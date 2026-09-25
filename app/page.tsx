@@ -15,6 +15,7 @@ type View = "dashboard" | "expenses" | "reports" | "settings";
 type StatePayload = { authenticated: boolean; currentUser?: CurrentUser; members: Member[]; expenses?: Expense[]; settlements?: Settlement[]; settlementRequests?: SettlementRequest[]; error?: string };
 
 const REMOTE_API = "https://flatledger2.mr-ads.chatgpt.site/api/flatledger";
+const GITHUB_PAGES_ORIGIN = "https://mr-ads-codes.github.io";
 const TOKEN_KEY = "flatledger2_session_token";
 const SESSION_EXPIRY_KEY = "flatledger2_session_expires_at";
 const SESSION_DURATION_MS = 30 * 60 * 1000;
@@ -32,13 +33,13 @@ const entryTimestamp = (value?: string) => {
 };
 
 function apiUrl() {
-  return typeof window !== "undefined" && Capacitor.isNativePlatform()
+  return typeof window !== "undefined" && (Capacitor.isNativePlatform() || window.location.origin === GITHUB_PAGES_ORIGIN)
     ? REMOTE_API
     : "/api/flatledger";
 }
 
 function authorizationHeaders(): Record<string, string> {
-  if (typeof window === "undefined" || !Capacitor.isNativePlatform()) return {};
+  if (typeof window === "undefined" || (!Capacitor.isNativePlatform() && window.location.origin !== GITHUB_PAGES_ORIGIN)) return {};
   const token = window.localStorage.getItem(TOKEN_KEY);
   const expiresAt = Number(window.localStorage.getItem(SESSION_EXPIRY_KEY) ?? 0);
   if (!token || !expiresAt || expiresAt <= Date.now()) {

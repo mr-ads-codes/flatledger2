@@ -3,6 +3,7 @@ const SESSION_TOKEN_PREFIX = "fl2.";
 const SESSION_MAX_AGE_SECONDS = 60 * 30;
 const ALLOWED_CROSS_ORIGINS = new Set([
   "https://localhost",
+  "https://mr-ads-codes.github.io",
 ]);
 const colors = ["#7457e8", "#e86f51", "#2d9f78", "#e0a629", "#4285d4", "#c35391", "#725a48", "#63708f"];
 

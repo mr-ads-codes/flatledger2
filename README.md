@@ -7,10 +7,11 @@ The new database starts with no members or transactions. No original database da
 ## Identifiers
 
 - Sites project: `appgprj_6ab60b2b929881918c1fd28909616b2c`
-- Website and API: `https://flatledger2.mr-ads.chatgpt.site` and `/api/flatledger`
+- Public website: `https://mr-ads-codes.github.io/flatledger2/` (GitHub Pages from `main/docs`)
+- Separate API: `https://flatledger2.mr-ads.chatgpt.site/api/flatledger`
 - Android application ID: `com.mradscodes.flatledger2`
 - D1 binding: `DB` in this new Sites project
 
 ## Development
 
-Install Node.js 22 or newer, then run `npm ci`. Run `npm run dev` for local web development. Run `npm run android:sync` to regenerate the Android web assets and Capacitor configuration before building in Android Studio. No member seed or migration from the original system is included.
+Install Node.js 22 or newer, then run `npm ci`. Run `npm run dev` for local web development. Run `npm run pages:build` to refresh the static GitHub Pages files in `docs/`, then commit them to `main`. Run `npm run android:sync` to regenerate the Android web assets and Capacitor configuration before building in Android Studio. GitHub Pages serves the frontend; the separate Sites deployment continues to serve the API and D1 database. No member seed or migration from the original system is included.
