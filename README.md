@@ -2,7 +2,7 @@
 
 FlatLedger2 is a separate copy of FlatLedger for another group. It uses the same expense, settlement, report, and member-management interface, with its own Sites project, D1 binding, API origin, session namespace, and Android package.
 
-The new database starts with no members or transactions. No original database data is imported. An administrator account must be added to the **new** database before anyone can sign in; thereafter, that administrator can manage members in the app. Never point this checkout at the original Sites project or D1 database.
+The new database starts with no members or transactions. No original database data is imported. To create the first administrator, open the new website and enter the administrator's name, a four-digit PIN, and the one-time setup code provided separately to the owner. The code is stored only as a secret in the new Sites project's `FLATLEDGER2_BOOTSTRAP_KEY` environment variable. It works only while the new database has no members. After setup, the administrator signs in and uses **Members & PINs** to add other members. Never point this checkout at the original Sites project or D1 database.
 
 ## Identifiers
 

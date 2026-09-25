@@ -137,6 +137,22 @@ export async function POST(request: Request) {
     const body = await request.json() as Record<string, unknown>;
     const action = String(body.action ?? "");
 
+    if (action === "bootstrapAdmin") {
+      const existing = await db.prepare("SELECT id FROM members LIMIT 1").first<{ id: string }>();
+      if (existing) return response(request, { error: "An administrator has already been set up" }, 409);
+      const { env } = await import("cloudflare:workers");
+      const setupKey = String(Reflect.get(env, "FLATLEDGER2_BOOTSTRAP_KEY") ?? "");
+      const suppliedKey = String(body.setupKey ?? "").trim();
+      if (!setupKey || suppliedKey !== setupKey) return response(request, { error: "Incorrect setup code" }, 403);
+      const name = String(body.name ?? "").trim();
+      const pin = String(body.pin ?? "");
+      if (!name || !/^\d{4}$/.test(pin)) return response(request, { error: "Enter a name and four-digit PIN" }, 400);
+      const result = await db.prepare("INSERT INTO members (id, name, pin_hash, color, active, is_admin, created_at) SELECT ?, ?, ?, ?, 1, 1, ? WHERE NOT EXISTS (SELECT 1 FROM members)")
+        .bind(makeId(), name, await hashPin(pin), colors[0], new Date().toISOString()).run();
+      if (result.meta.changes !== 1) return response(request, { error: "An administrator has already been set up" }, 409);
+      return response(request, await statePayload(null));
+    }
+
     if (action === "login") {
       const memberId = String(body.memberId ?? "");
       const pin = String(body.pin ?? "");

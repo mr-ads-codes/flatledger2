@@ -80,6 +80,10 @@ export default function Home() {
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [loginMember, setLoginMember] = useState<Member | null>(null);
   const [pin, setPin] = useState("");
+  const [setupName, setSetupName] = useState("");
+  const [setupPin, setSetupPin] = useState("");
+  const [setupKey, setSetupKey] = useState("");
+  const [setupBusy, setSetupBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<View>("dashboard");
@@ -226,6 +230,18 @@ export default function Home() {
     } catch { /* notice is shown above the form */ }
   }
 
+  async function setupAdministrator(event: FormEvent) {
+    event.preventDefault();
+    if (!setupName.trim() || setupPin.length !== 4 || !setupKey.trim()) return;
+    setSetupBusy(true);
+    try {
+      await action("bootstrapAdmin", { name: setupName.trim(), pin: setupPin, setupKey: setupKey.trim() });
+      setSetupName(""); setSetupPin(""); setSetupKey("");
+      setNotice("Administrator created. Select your profile and enter your PIN to sign in.");
+    } catch { /* notice is shown above the form */ }
+    finally { setSetupBusy(false); }
+  }
+
   async function logout() {
     try { await action("logout"); } catch { /* local lock still applies */ }
     clearSessionCredentials();
@@ -242,10 +258,15 @@ export default function Home() {
   if (!currentUser) return <main className="login-shell"><section className="login-card">
     <div className="brand"><BrandMark /><span>FlatLedger2</span></div>
     {!loginMember ? <>
-      <div className="login-copy"><span className="eyebrow">SHARED FLAT · {activeMembers.length} MEMBERS</span><h1>Who’s adding<br />an expense?</h1><p>Select your profile to continue.</p></div>
+      <div className="login-copy"><span className="eyebrow">SHARED FLAT · {activeMembers.length} MEMBERS</span><h1>{activeMembers.length ? <>Who’s adding<br />an expense?</> : "Set up your group"}</h1><p>{activeMembers.length ? "Select your profile to continue." : "Create the first administrator to get started."}</p></div>
       {notice && <p className="alert">{notice}</p>}
       <div className="member-grid">{activeMembers.map(member => <button className="member-tile" key={member.id} onClick={() => { setLoginMember(member); setNotice(""); }}><span className="avatar" style={{ background: member.color }}>{member.name.slice(0, 1)}</span><span><strong>{member.name}</strong><small>{member.isAdmin ? "Administrator" : "Tap to sign in"}</small></span></button>)}</div>
-      {activeMembers.length === 0 && <p className="demo-note">No members have been added to this group yet.</p>}
+      {activeMembers.length === 0 && <form className="setup-admin" onSubmit={setupAdministrator}>
+        <label>Your name<input autoComplete="name" maxLength={80} value={setupName} onChange={event => setSetupName(event.target.value)} placeholder="Administrator name" /></label>
+        <label>Your four-digit PIN<input inputMode="numeric" autoComplete="new-password" type="password" maxLength={4} value={setupPin} onChange={event => setSetupPin(event.target.value.replace(/\D/g, ""))} placeholder="4-digit PIN" /></label>
+        <label>One-time setup code<input autoComplete="off" type="password" value={setupKey} onChange={event => setSetupKey(event.target.value)} placeholder="Code provided to the owner" /></label>
+        <button className="primary" disabled={setupBusy || !setupName.trim() || setupPin.length !== 4 || !setupKey.trim()}>{setupBusy ? "Creating…" : "Create administrator"}</button>
+      </form>}
       <p className="demo-note">PIN protected · Automatically locks after 30 minutes</p>
     </> : <form className="pin-form" onSubmit={login}>
       <button type="button" className="back" onClick={() => { setLoginMember(null); setPin(""); setNotice(""); }}>← All profiles</button>
